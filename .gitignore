@@ -1,8 +1,13 @@
+# Sensitive data
 .env
 
-dockerfile
+# Docker files
+Dockerfile
 docker-compose.yml
 
+# Other configurations
 .air.toml
 
+# Vim swap files
 *.swp
+
