@@ -8,16 +8,9 @@ import (
 	"log"
 	"net/http"
 	"net/url" // Import the net/url package for encoding
+	"BooksAPI/internal/models"
 )
 
-type Book struct {
-	Title         string
-	Authors       []string
-	Subtitle      string
-	Description   string
-	AverageRating float64
-	PublishedDate string
-}
 
 func FetchBooks(w http.ResponseWriter, r *http.Request) {
 	// Parse query parameters from the URL
@@ -58,7 +51,6 @@ func FetchBooks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse the response body into a structured format
 	var data struct {
 		Items []struct {
 			VolumeInfo struct {
@@ -78,25 +70,14 @@ func FetchBooks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create a list of books from the parsed data
-	var books []Book
-	for _, item := range data.Items {
-		books = append(books, Book{
-			Title:         item.VolumeInfo.Title,
-			Authors:       item.VolumeInfo.Authors,
-			Subtitle:      item.VolumeInfo.Subtitle,
-			Description:   item.VolumeInfo.Description,
-			AverageRating: item.VolumeInfo.AverageRating,
-			PublishedDate: item.VolumeInfo.PublishedDate,
-		})
-	}
+	books := models.CreateBooks(data)
+
 
 	log.Printf("Books: %+v", books)
 	for _, book := range books {
 		log.Printf("Title: %s, Authors: %v, Average Rating: %.2f", book.Title, book.Authors, book.AverageRating)
 	}
 
-	// Return the books as JSON in the response
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(books)
 	if err != nil {

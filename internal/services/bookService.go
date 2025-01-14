@@ -1,19 +1,14 @@
 package services
 
 import (
-	//"context"
-	"database/sql"
-	//"fmt"
+	"BooksAPI/db"
+	"BooksAPI/internal/models"
+	"context"
 )
 
+func InsertBooks(book models.Book) error {
 
-type BookDatabase struct{
-	db *sql.DB
+	query := "INSERT INTO book (title,subtitle,authors,published_date,description,average_rating)"
+	ctx := context.Background()
+	return nil
 }
-
-
-func NewBookDatabase(db *sql.DB) *BookDatabase{
-	return &BookDatabase{db:db}
-}
-
-func AddBooks(bd *BookDatabase)
