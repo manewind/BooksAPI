@@ -2,29 +2,38 @@ package api
 
 import (
 	"BooksAPI/config"
+	"BooksAPI/db"
+	"BooksAPI/internal/models"
+	"BooksAPI/internal/services"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url" // Import the net/url package for encoding
-	"BooksAPI/internal/models"
 )
 
-
-func FetchBooks(w http.ResponseWriter, r *http.Request) {
+func FetchBooks(w http.ResponseWriter, r *http.Request, qe *db.QueryExecutor) {
 	// Parse query parameters from the URL
 	query := r.URL.Query().Get("q")
+	log.Println(query)
+
 	if query == "" {
 		http.Error(w, "Query parameter 'q' is required", http.StatusBadRequest)
 		return
 	}
 
-	// URL encode only the 'q' parameter
+	// URL encode the 'q' parameter
 	encodedQuery := url.QueryEscape(query)
 
-	// Create the complete URL for the Books API call with the encoded query
-	apiURL := fmt.Sprintf("%s?q=%s&%s", config.AppConfig.APIConfig.BooksAPIBaseURL, encodedQuery, r.URL.RawQuery[len("q="+query)+1:])
+	// Prepare other query parameters (e.g., maxResults)
+	maxResults := r.URL.Query().Get("maxResults")
+	if maxResults == "" {
+		maxResults = "10" // Default value if not provided
+	}
+
+	// Create the complete URL for the Books API call
+	apiURL := fmt.Sprintf("%s?q=%s&maxResults=%s", config.AppConfig.APIConfig.BooksAPIBaseURL, encodedQuery, maxResults)
 
 	log.Printf("Fetching data from: %s\n", apiURL)
 
@@ -72,10 +81,13 @@ func FetchBooks(w http.ResponseWriter, r *http.Request) {
 
 	books := models.CreateBooks(data)
 
-
-	log.Printf("Books: %+v", books)
 	for _, book := range books {
-		log.Printf("Title: %s, Authors: %v, Average Rating: %.2f", book.Title, book.Authors, book.AverageRating)
+		err := services.InsertBooks(qe, book)
+		if err != nil {
+			log.Printf("Error while inserting book: %v", err)
+			continue
+		}
+		log.Printf("Inserted book: %s, Authors: %v, Average Rating: %.2f", book.Title, book.Authors, book.AverageRating)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -85,4 +97,3 @@ func FetchBooks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-

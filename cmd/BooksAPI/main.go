@@ -20,7 +20,11 @@ func main() {
 	http.HandleFunc("/", helloHandler)
 	config.LoadConfig()
 
-	http.HandleFunc("/books",api.FetchBooks)
+	qe := &db.QueryExecutor{}
+
+	http.HandleFunc("/books",func(w http.ResponseWriter,r *http.Request){
+		api.FetchBooks(w,r,qe)
+	})
 	fmt.Println(config.AppConfig.APIConfig.BooksAPIBaseURL)
 
 	config.LoadConfig()

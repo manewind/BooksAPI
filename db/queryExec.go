@@ -8,15 +8,15 @@ import (
 )
 
 type QueryExecutor struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
 func NewQueryExecutor(db *sql.DB) *QueryExecutor {
-	return &QueryExecutor{db: db}
+	return &QueryExecutor{DB: db}
 }
 
 func (qe *QueryExecutor) Query(ctx context.Context, query string, args ...any) ([]map[string]interface{}, error) {
-	rows, err := qe.db.QueryContext(ctx, query, args...)
+	rows, err := qe.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (qe *QueryExecutor) Query(ctx context.Context, query string, args ...any) (
 }
 
 func (qe *QueryExecutor) Exec(ctx context.Context, query string, args ...any) (int64, error) {
-	result, err := qe.db.ExecContext(ctx, query, args...)
+	result, err := qe.DB.ExecContext(ctx, query, args...)
 	if err != nil {
 		return 0, err
 	}
